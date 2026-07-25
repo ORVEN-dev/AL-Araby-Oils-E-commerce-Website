@@ -3,22 +3,73 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    
+    <!-- Primary Meta Tags -->
     <title>Alaraby Oils - Premium Natural Beauty & Wellness Products</title>
+    <meta name="title" content="Alaraby Oils - Premium Natural Beauty & Wellness Products" />
     <meta name="description" content="Discover pure organic oils, herbal supplements, and natural skincare. Shop premium essential oils, aromatherapy products, and organic beauty essentials at Alaraby Oils." />
     <meta name="author" content="Alaraby Oils" />
     <meta name="keywords" content="natural oils, essential oils, organic skincare, herbal supplements, aromatherapy, natural beauty, wellness products" />
-
+    
+    <!-- Theme Color -->
+    <meta name="theme-color" content="#3d8b71" />
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
     <meta property="og:title" content="Alaraby Oils - Premium Natural Beauty & Wellness" />
     <meta property="og:description" content="Premium organic oils, herbs, and natural skincare. 100% natural ingredients for your health and beauty care." />
-    <meta property="og:type" content="website" />
-
+    <meta property="og:site_name" content="Alaraby Oils" />
+    
+    <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="Alaraby Oils - Natural Beauty & Wellness" />
     <meta name="twitter:description" content="Shop premium natural oils, herbs, and organic skincare products" />
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+    <!-- Pre-mount loading indicator. Tailwind supplies .sr-only once the app
+         stylesheet lands; only what has to work *before* that lives here. -->
+    <style>
+      body { margin: 0; }
+
+      #app-loading {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        background: hsl(35 40% 96%);
+      }
+      
+      #app-loading .spinner {
+        width: 48px;
+        height: 48px;
+        border: 4px solid hsl(35 15% 85%);
+        border-top-color: hsl(162 45% 35%);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+      
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
+    </style>
   </head>
 
   <body>
-    <div id="root"></div>
+    <noscript>
+      <div style="padding: 2rem; text-align: center;">
+        <h1>JavaScript Required</h1>
+        <p>This application requires JavaScript to be enabled. Please enable JavaScript in your browser settings.</p>
+      </div>
+    </noscript>
+    
+    <div id="root">
+      <div id="app-loading" role="status" aria-live="polite" aria-label="Loading Alaraby Oils">
+        <div class="spinner"></div>
+      </div>
+    </div>
+    
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

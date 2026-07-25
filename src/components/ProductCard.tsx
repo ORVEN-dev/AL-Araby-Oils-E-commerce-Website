@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, memo } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { ShoppingCart, Star, Plus, Minus } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -17,22 +17,21 @@ interface ProductCardProps {
   product: Product;
 }
 
-const ProductCard = ({ product }: ProductCardProps) => {
+const ProductCard = memo(({ product }: ProductCardProps) => {
   const { addToCart } = useCart();
   const navigate = useNavigate();
   const [showQuickView, setShowQuickView] = useState(false);
+  const [imageLoaded, setImageLoaded] = useState(false);
   const longPressTimer = useRef<NodeJS.Timeout | null>(null);
   const [isLongPress, setIsLongPress] = useState(false);
 
-  // Quantity Selector State (للكارت العادي)
+  // Quantity Selector State
   const [showQuantitySelector, setShowQuantitySelector] = useState(false);
   const [selectedQuantity, setSelectedQuantity] = useState(1);
-
-  // Quantity Selector State (للـ pop-up)
   const [showPopupQuantitySelector, setShowPopupQuantitySelector] = useState(false);
   const [popupSelectedQuantity, setPopupSelectedQuantity] = useState(1);
 
-  // Touch Events (للموبايل)
+  // Touch Events
   const handleTouchStart = () => {
     setIsLongPress(false);
     longPressTimer.current = setTimeout(() => {
@@ -56,7 +55,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
     }
   };
 
-  // Mouse Events (للكمبيوتر)
+  // Mouse Events
   const handleMouseDown = (e: React.MouseEvent) => {
     if (e.button === 2) {
       e.preventDefault();
@@ -101,7 +100,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
     }
   };
 
-  // Quantity Selector Handlers (للكارت العادي)
+  // Regular cart handlers
   const handleFirstAddToCart = () => {
     setShowQuantitySelector(true);
     setSelectedQuantity(1);
@@ -123,7 +122,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
     }
   };
 
-  // Quantity Selector Handlers (للـ pop-up)
+  // Popup cart handlers
   const handlePopupFirstAddToCart = (e: React.MouseEvent) => {
     e.stopPropagation();
     setShowPopupQuantitySelector(true);
@@ -153,7 +152,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
   return (
     <>
       <Card
-        className="group hover:shadow-lg transition-shadow overflow-hidden"
+        className="group hover:shadow-lg transition-shadow overflow-hidden focus-within:ring-2 focus-within:ring-primary"
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
         onTouchMove={handleTouchMove}
@@ -162,15 +161,32 @@ const ProductCard = ({ product }: ProductCardProps) => {
         onMouseLeave={handleMouseLeave}
         onContextMenu={handleContextMenu}
       >
-        <Link to={`/product/${product.id}`} onClick={handleCardClick}>
+        <Link 
+          to={`/product/${product.id}`} 
+          onClick={handleCardClick}
+          aria-label={`View details for ${product.name}`}
+        >
           <div className="relative aspect-square overflow-hidden bg-secondary">
+            {!imageLoaded && (
+              <div className="absolute inset-0 bg-secondary animate-pulse" />
+            )}
             <img
               src={product.image}
-              alt={product.name}
-              className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-300"
+              alt={`${product.name} - ${product.category}`}
+              className={`object-cover w-full h-full group-hover:scale-105 transition-transform duration-300 ${
+                imageLoaded ? 'opacity-100' : 'opacity-0'
+              }`}
+              loading="lazy"
+              onLoad={() => setImageLoaded(true)}
+              /* onError too, or a 404 leaves an invisible img over a skeleton
+                 pulsing forever — and suppresses the alt-text fallback. */
+              onError={() => setImageLoaded(true)}
             />
             {product.discount && (
-              <Badge className="absolute top-2 right-2 bg-badge text-badge-foreground">
+              <Badge 
+                className="absolute top-2 right-2 bg-badge text-badge-foreground"
+                aria-label={`${product.discount}% discount`}
+              >
                 {product.discount}% OFF
               </Badge>
             )}
@@ -179,13 +195,17 @@ const ProductCard = ({ product }: ProductCardProps) => {
 
         <CardContent className="p-4">
           <p className="text-xs text-muted-foreground mb-1">{product.category}</p>
-          <Link to={`/product/${product.id}`} onClick={handleCardClick}>
+          <Link 
+            to={`/product/${product.id}`} 
+            onClick={handleCardClick}
+            className="rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+          >
             <h3 className="font-semibold text-foreground hover:text-primary transition-colors mb-2">
               {product.name}
             </h3>
           </Link>
-          <div className="flex items-center gap-1 mb-2">
-            <Star className="h-4 w-4 fill-warning text-warning" />
+          <div className="flex items-center gap-1 mb-2" role="img" aria-label={`Rated ${product.rating} out of 5 stars with ${product.reviewCount} reviews`}>
+            <Star className="h-4 w-4 fill-warning text-warning" aria-hidden="true" />
             <span className="text-sm font-medium">{product.rating}</span>
             <span className="text-xs text-muted-foreground">({product.reviewCount})</span>
           </div>
@@ -204,34 +224,45 @@ const ProductCard = ({ product }: ProductCardProps) => {
             <Button
               onClick={handleFirstAddToCart}
               className="w-full bg-success hover:bg-success/90"
+              aria-label={`Add ${product.name} to cart`}
             >
-              <ShoppingCart className="h-4 w-4 mr-2" />
+              <ShoppingCart className="h-4 w-4 mr-2" aria-hidden="true" />
               Add to Cart
             </Button>
           ) : (
-            <div className="w-full flex gap-2">
+            <div className="w-full flex gap-2" role="group" aria-label="Quantity selector">
               <div className="flex items-center border rounded-lg">
                 <Button
                   variant="ghost"
                   size="icon"
                   className="h-10 w-10"
                   onClick={decrementQuantity}
+                  aria-label="Decrease quantity"
+                  disabled={selectedQuantity <= 1}
                 >
-                  <Minus className="h-4 w-4" />
+                  <Minus className="h-4 w-4" aria-hidden="true" />
                 </Button>
-                <span className="w-12 text-center font-medium">{selectedQuantity}</span>
+                <span 
+                  className="w-12 text-center font-medium"
+                  aria-label={`Quantity: ${selectedQuantity}`}
+                  aria-live="polite"
+                >
+                  {selectedQuantity}
+                </span>
                 <Button
                   variant="ghost"
                   size="icon"
                   className="h-10 w-10"
                   onClick={incrementQuantity}
+                  aria-label="Increase quantity"
                 >
-                  <Plus className="h-4 w-4" />
+                  <Plus className="h-4 w-4" aria-hidden="true" />
                 </Button>
               </div>
               <Button
                 onClick={handleConfirmAddToCart}
                 className="flex-1 bg-success hover:bg-success/90"
+                aria-label={`Add ${selectedQuantity} ${selectedQuantity === 1 ? 'item' : 'items'} to cart`}
               >
                 Add
               </Button>
@@ -254,7 +285,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
             <div className="relative aspect-square overflow-hidden rounded-lg bg-secondary">
               <img
                 src={product.image}
-                alt={product.name}
+                alt={`${product.name} - ${product.category}`}
                 className="object-cover w-full h-full"
               />
               {product.discount && (
@@ -268,7 +299,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
               <p className="text-sm text-muted-foreground mb-2">{product.category}</p>
 
               <div className="flex items-center gap-1 mb-3">
-                <Star className="h-4 w-4 fill-warning text-warning" />
+                <Star className="h-4 w-4 fill-warning text-warning" aria-hidden="true" />
                 <span className="text-sm font-medium">{product.rating}</span>
                 <span className="text-xs text-muted-foreground">({product.reviewCount} reviews)</span>
               </div>
@@ -303,6 +334,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
                         size="icon"
                         className="h-10 w-10"
                         onClick={decrementPopupQuantity}
+                        aria-label="Decrease quantity"
                       >
                         <Minus className="h-4 w-4" />
                       </Button>
@@ -312,6 +344,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
                         size="icon"
                         className="h-10 w-10"
                         onClick={incrementPopupQuantity}
+                        aria-label="Increase quantity"
                       >
                         <Plus className="h-4 w-4" />
                       </Button>
@@ -345,6 +378,8 @@ const ProductCard = ({ product }: ProductCardProps) => {
       </Dialog>
     </>
   );
-};
+});
+
+ProductCard.displayName = 'ProductCard';
 
 export default ProductCard;

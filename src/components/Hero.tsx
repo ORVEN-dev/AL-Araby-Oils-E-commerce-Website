@@ -8,39 +8,59 @@ import heroHerbs from "@/assets/hero-herbs.jpg";
 const slides = [
   {
     image: heroOils,
+    alt: "Premium natural skincare oils and beauty products"
   },
   {
     image: heroBeauty,
+    alt: "Organic beauty and wellness collection"
   },
   {
     image: heroHerbs,
+    alt: "Natural herbs and aromatherapy products"
   },
 ];
 
 const Hero = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [paused, setPaused] = useState(false);
 
   useEffect(() => {
+    // WCAG 2.2.2: no auto-advance while paused or when the user asked for less motion
+    if (paused || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
     const timer = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % slides.length);
     }, 5000);
     return () => clearInterval(timer);
-  }, []);
+  }, [paused]);
 
   return (
-    <div className="relative h-[600px] lg:h-[700px] xl:h-[850px] overflow-hidden bg-secondary">
+    <section
+      className="relative h-[600px] lg:h-[700px] xl:h-[850px] overflow-hidden bg-secondary"
+      aria-label="Hero slideshow showcasing natural beauty products"
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
+      onFocusCapture={() => setPaused(true)}
+      onBlurCapture={() => setPaused(false)}
+    >
       {slides.map((slide, index) => (
         <div
           key={index}
-          className={`absolute inset-0 transition-opacity duration-1000 ${index === currentSlide ? "opacity-100" : "opacity-0 pointer-events-none"
-            }`}
+          className={`absolute inset-0 transition-opacity duration-1000 ${
+            index === currentSlide ? "opacity-100" : "opacity-0 pointer-events-none"
+          }`}
+          aria-hidden={index !== currentSlide}
         >
           <div className="absolute inset-0">
             <img
               src={slide.image}
+              alt={slide.alt}
               className="w-full h-full object-cover"
+              loading={index === 0 ? "eager" : "lazy"}
             />
-            <div className="absolute inset-0 bg-gradient-to-r from-black/60 to-transparent" />
+            {/* Scrim carries the headline contrast: the green "& Wellness" line
+                measures 1.11:1 on slide 2 against a weaker gradient. */}
+            <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/45 to-transparent" />
           </div>
 
           {/* Hero Content */}
@@ -59,7 +79,7 @@ const Hero = () => {
         </div>
       ))}
 
-      {/* Buttons - Outside slides for consistent hover */}
+      {/* Buttons */}
       <div className="absolute inset-0 pointer-events-none">
         <div className="relative container mx-auto px-4 h-full flex items-center">
           <div className="max-w-lg">
@@ -87,17 +107,25 @@ const Hero = () => {
       </div>
 
       {/* Indicators */}
-      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex gap-2">
+      <div
+        className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex gap-2"
+        role="group"
+        aria-label="Slideshow navigation"
+      >
         {slides.map((_, index) => (
           <button
             key={index}
             onClick={() => setCurrentSlide(index)}
-            className={`w-2 h-2 rounded-full transition-all ${index === currentSlide ? "bg-white w-8" : "bg-white/50"
-              }`}
+            /* before:-inset-3 pads the 8px dot out to a 32px hit target (WCAG 2.5.8) */
+            className={`relative h-2 rounded-full transition-all before:absolute before:-inset-3 before:content-[''] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-black/40 ${
+              index === currentSlide ? "bg-white w-8" : "bg-white/50 w-2"
+            }`}
+            aria-current={index === currentSlide}
+            aria-label={`Go to slide ${index + 1}`}
           />
         ))}
       </div>
-    </div>
+    </section>
   );
 };
 

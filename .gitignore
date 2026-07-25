@@ -12,7 +12,15 @@ dist
 dist-ssr
 *.local
 
+# Generated knowledge graph - rebuildable, see CLAUDE.md
+graphify-out
+
+# Browser-review scratch (playwright-cli sessions, screenshots)
+.playwright-cli
+v-*.png
+
 # Editor directories and files
+.obsidian
 .vscode/*
 !.vscode/extensions.json
 .idea
