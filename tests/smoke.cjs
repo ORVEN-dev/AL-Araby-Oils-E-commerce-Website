@@ -61,6 +61,11 @@ async function run() {
         await quickView.click();
       }
       await preview.getByText("$28.99", { exact: true }).waitFor();
+      await preview.getByRole("button", { name: "Add to Cart", exact: true }).click();
+      const previewQuantity = preview.getByRole("group", { name: "Quantity selector" });
+      await previewQuantity.getByRole("button", { name: "Increase quantity" }).click();
+      assert.equal(await page.evaluate(key => JSON.parse(localStorage.getItem(key) ?? "[]").length, cartKey), 0);
+      await fit();
       const popup = await preview.boundingBox();
       assert.ok(popup && popup.x >= 0 && popup.x + popup.width <= width, `Quick View overflows at ${width}`);
       await preview.getByRole("link", { name: "View Details" }).click();
@@ -68,6 +73,16 @@ async function run() {
       await page.goBack();
       await title("All Products");
       await preview.waitFor({ state: "hidden" });
+      await quickView.click();
+      await preview.getByRole("button", { name: "Add to Cart", exact: true }).click();
+      await previewQuantity.getByRole("button", { name: "Add 1 to Cart", exact: true }).waitFor();
+      await previewQuantity.getByRole("button", { name: "Increase quantity" }).click();
+      await previewQuantity.getByRole("button", { name: "Add 2 to Cart", exact: true }).click();
+      await preview.waitFor({ state: "hidden" });
+      await open("/cart", "Shopping Cart");
+      await page.getByText("$57.98", { exact: true }).first().waitFor();
+      await page.getByRole("button", { name: "Remove Argan Oil from cart" }).click();
+      await open("/shop", "All Products");
       const add = page.getByRole("button", { name: "Add Argan Oil to cart", exact: true });
       await add.click();
       const group = page.getByRole("group", { name: "Quantity selector" });

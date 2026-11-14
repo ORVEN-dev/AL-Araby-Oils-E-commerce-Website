@@ -27,8 +27,14 @@ const ProductCard = memo(({ product }: ProductCardProps) => {
   const scene = useRef<HTMLDivElement>(null);
   const [imageLoaded, setImageLoaded] = useState(false);
   const [quickViewOpen, setQuickViewOpen] = useState(false);
+  const [quickViewQuantity, setQuickViewQuantity] = useState<number | null>(null);
   const [showQuantitySelector, setShowQuantitySelector] = useState(false);
   const [selectedQuantity, setSelectedQuantity] = useState(1);
+
+  const updateQuickView = (open: boolean) => {
+    setQuickViewOpen(open);
+    if (!open) setQuickViewQuantity(null);
+  };
 
   /* ---- Pointer-tracked 3D tilt -------------------------------------------
      Gated on `(hover: hover) and (pointer: fine)`: on a touchscreen there is no
@@ -88,7 +94,7 @@ const ProductCard = memo(({ product }: ProductCardProps) => {
   }, scene);
 
   return (
-    <Dialog open={quickViewOpen} onOpenChange={setQuickViewOpen}>
+    <Dialog open={quickViewOpen} onOpenChange={updateQuickView}>
       <div ref={scene} data-product-card className="scene-near">
       <Card
         data-tilt
@@ -255,19 +261,59 @@ const ProductCard = memo(({ product }: ProductCardProps) => {
           )}
         </div>
         <div className="grid gap-2 sm:grid-cols-2">
-          <Button
-            type="button"
-            disabled={!product.inStock}
-            className="h-11 bg-success hover:bg-success/90"
-            onClick={() => {
-              addToCart(product, 1);
-              setQuickViewOpen(false);
-            }}
-          >
-            {product.inStock ? "Add to Cart" : "Out of Stock"}
-          </Button>
+          {quickViewQuantity === null ? (
+            <Button
+              type="button"
+              disabled={!product.inStock}
+              className="h-11 bg-success hover:bg-success/90"
+              onClick={() => setQuickViewQuantity(1)}
+            >
+              {product.inStock ? "Add to Cart" : "Out of Stock"}
+            </Button>
+          ) : (
+            <div className="grid gap-2 sm:col-span-2" role="group" aria-label="Quantity selector">
+              <div className="flex items-center rounded-lg border">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="h-11 w-11 shrink-0"
+                  aria-label="Decrease quantity"
+                  disabled={quickViewQuantity <= 1}
+                  onClick={() => setQuickViewQuantity(quickViewQuantity - 1)}
+                >
+                  <Minus aria-hidden="true" />
+                </Button>
+                <span className="flex-1 text-center font-medium" aria-live="polite">
+                  {quickViewQuantity}
+                </span>
+                <Button
+                  autoFocus
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="h-11 w-11 shrink-0"
+                  aria-label="Increase quantity"
+                  disabled={quickViewQuantity >= MAX_CART_QUANTITY}
+                  onClick={() => setQuickViewQuantity(quickViewQuantity + 1)}
+                >
+                  <Plus aria-hidden="true" />
+                </Button>
+              </div>
+              <Button
+                type="button"
+                className="h-11 bg-success hover:bg-success/90"
+                onClick={() => {
+                  addToCart(product, quickViewQuantity);
+                  updateQuickView(false);
+                }}
+              >
+                Add {quickViewQuantity} to Cart
+              </Button>
+            </div>
+          )}
           <Button asChild variant="outline" className="h-11">
-            <Link to={`/product/${product.id}`} onClick={() => setQuickViewOpen(false)}>
+            <Link to={`/product/${product.id}`} onClick={() => updateQuickView(false)}>
               View Details
             </Link>
           </Button>
