@@ -15,7 +15,7 @@ _A modern e-commerce frontend focused on clean UI, smooth UX, and scalability._
 ## 🚀 Live Demo
 
 🔗 **View Live Website:**
-[https://mohammed-004del.github.io/AL-Araby-Oils-E-commerce-Website/](https://mohammed-004del.github.io/AL-Araby-Oils-E-commerce-Website/)
+[https://orven-dev.github.io/AL-Araby-Oils-E-commerce-Website/](https://orven-dev.github.io/AL-Araby-Oils-E-commerce-Website/)
 
 ---
 
@@ -99,7 +99,7 @@ src/
 ### 1️⃣ Clone the repository
 
 ```bash
-git clone https://github.com/Mohammed-004del/AL-Araby-Oils-E-commerce-Website.git
+git clone https://github.com/ORVEN-dev/AL-Araby-Oils-E-commerce-Website.git
 ```
 
 ### 2️⃣ Navigate to project folder

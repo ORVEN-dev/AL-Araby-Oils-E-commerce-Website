@@ -25,7 +25,7 @@ const SAVED_KEY = "orven:al-araby-oils:saved:v1";
  *
  * This runs inside the state initialiser of the provider that wraps the whole
  * tree, so anything thrown here unmounts the app to a blank page with no way
- * back. `mohammed-004del.github.io` is one origin shared by every repo the owner
+ * back. `orven-dev.github.io` is one origin shared by every repo the owner
  * publishes, so an unrelated project writing a `cart` key lands here too — the
  * stored value is untrusted input and is treated as such.
  *
