@@ -49,6 +49,25 @@ async function run() {
       await page.getByRole("combobox", { name: "Sort products by" }).click();
       await page.getByRole("option", { name: "Price: Low to High" }).click();
       assert.match(page.url(), /sort=price/);
+      const quickView = page.getByRole("button", { name: "Quick View: Argan Oil", exact: true });
+      const preview = page.getByRole("dialog", { name: "Argan Oil", exact: true });
+      if (width === 1440) {
+        await page.getByRole("link", { name: "View details for Argan Oil" }).click({ button: "right" });
+        await preview.waitFor();
+        await page.keyboard.press("Escape");
+        await preview.waitFor({ state: "hidden" });
+        await quickView.press("Enter");
+      } else {
+        await quickView.click();
+      }
+      await preview.getByText("$28.99", { exact: true }).waitFor();
+      const popup = await preview.boundingBox();
+      assert.ok(popup && popup.x >= 0 && popup.x + popup.width <= width, `Quick View overflows at ${width}`);
+      await preview.getByRole("link", { name: "View Details" }).click();
+      await title("Argan Oil");
+      await page.goBack();
+      await title("All Products");
+      await preview.waitFor({ state: "hidden" });
       const add = page.getByRole("button", { name: "Add Argan Oil to cart", exact: true });
       await add.click();
       const group = page.getByRole("group", { name: "Quantity selector" });

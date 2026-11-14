@@ -4,6 +4,14 @@ import { ShoppingCart, Plus, Minus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Product } from "@/types/product";
 import { useCart } from "@/contexts/CartContext";
 import { MAX_CART_QUANTITY } from "@/lib/schemas";
@@ -18,6 +26,7 @@ const ProductCard = memo(({ product }: ProductCardProps) => {
   const { addToCart } = useCart();
   const scene = useRef<HTMLDivElement>(null);
   const [imageLoaded, setImageLoaded] = useState(false);
+  const [quickViewOpen, setQuickViewOpen] = useState(false);
   const [showQuantitySelector, setShowQuantitySelector] = useState(false);
   const [selectedQuantity, setSelectedQuantity] = useState(1);
 
@@ -79,10 +88,14 @@ const ProductCard = memo(({ product }: ProductCardProps) => {
   }, scene);
 
   return (
-    <>
+    <Dialog open={quickViewOpen} onOpenChange={setQuickViewOpen}>
       <div ref={scene} data-product-card className="scene-near">
       <Card
         data-tilt
+        onContextMenu={(event) => {
+          event.preventDefault();
+          setQuickViewOpen(true);
+        }}
         className="group relative preserve-3d shadow-rest hover:shadow-float transition-shadow duration-500 overflow-hidden focus-within:ring-2 focus-within:ring-primary"
       >
         <div>
@@ -154,7 +167,17 @@ const ProductCard = memo(({ product }: ProductCardProps) => {
         </CardContent>
         </div>
 
-        <CardFooter className="p-2.5 pt-0 sm:p-4 sm:pt-0">
+        <CardFooter className="flex-col gap-2 p-2.5 pt-0 sm:p-4 sm:pt-0">
+          <DialogTrigger asChild>
+            <Button
+              type="button"
+              variant="outline"
+              className="h-11 w-full px-2"
+              aria-label={`Quick View: ${product.name}`}
+            >
+              Quick View
+            </Button>
+          </DialogTrigger>
           {!showQuantitySelector ? (
             <Button
               onClick={() => setShowQuantitySelector(true)}
@@ -209,7 +232,48 @@ const ProductCard = memo(({ product }: ProductCardProps) => {
       </Card>
       </div>
 
-    </>
+      <DialogContent className="max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] overflow-y-auto rounded-lg motion-reduce:animate-none">
+        <DialogHeader className="pr-7 text-left">
+          <DialogTitle>{product.name}</DialogTitle>
+          <DialogDescription>{product.category}</DialogDescription>
+        </DialogHeader>
+        <figure>
+          <img
+            src={product.image}
+            alt={product.illustrativeImage ? "" : product.name}
+            className="h-[min(36dvh,18rem)] w-full rounded-md bg-secondary object-contain"
+          />
+          {product.illustrativeImage && (
+            <figcaption className="mt-1 text-xs text-muted-foreground">Category image</figcaption>
+          )}
+        </figure>
+        <p className="text-sm text-muted-foreground">{product.description}</p>
+        <div className="flex flex-wrap items-center gap-x-2">
+          <span className="text-lg font-bold text-success">${product.price}</span>
+          {product.originalPrice && (
+            <span className="text-sm text-muted-foreground line-through">${product.originalPrice}</span>
+          )}
+        </div>
+        <div className="grid gap-2 sm:grid-cols-2">
+          <Button
+            type="button"
+            disabled={!product.inStock}
+            className="h-11 bg-success hover:bg-success/90"
+            onClick={() => {
+              addToCart(product, 1);
+              setQuickViewOpen(false);
+            }}
+          >
+            {product.inStock ? "Add to Cart" : "Out of Stock"}
+          </Button>
+          <Button asChild variant="outline" className="h-11">
+            <Link to={`/product/${product.id}`} onClick={() => setQuickViewOpen(false)}>
+              View Details
+            </Link>
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 });
 
