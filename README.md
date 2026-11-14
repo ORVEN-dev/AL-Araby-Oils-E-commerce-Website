@@ -145,9 +145,14 @@ Independent ORVEN storefront concept with a sample catalogue, browser-local cart
 and saved products, and a checkout preview. The demo does not take payments,
 create orders, or collect account details.
 
-Cloudflare Workers Builds deploys the Vite build on pushes to `main`. The
-older GitHub Pages build uses `npm run build:github-pages` for its repository
-base path. Both deployments use the same hash routes.
+Cloudflare Workers Builds deploys the Vite build on pushes to `main`. Follow
+the `Workers Builds: al-araby-oils` check on the GitHub commit for the build
+status and logs.
+
+The [older GitHub Pages address](https://orven-dev.github.io/AL-Araby-Oils-E-commerce-Website/)
+uses `npm run build:github-pages` for its repository base path. Both
+deployments use the same hash routes. Browser carts and wishlists are stored
+separately on each host.
 
 ---
 
