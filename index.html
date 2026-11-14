@@ -14,14 +14,13 @@
     <meta name="theme-color" content="#3d8b71" />
     
     <!-- Open Graph / Facebook -->
-    <!-- og:image and og:url MUST be absolute — crawlers do not resolve relative
-         paths, and there is no <base> tag. Hardcoded to the GitHub Pages origin. -->
+    <!-- The build supplies an absolute URL for social previews on each host. -->
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://orven-dev.github.io/AL-Araby-Oils-E-commerce-Website/" />
+    <meta property="og:url" content="%VITE_SITE_URL%" />
     <meta property="og:title" content="AL-Araby Oils — Storefront Demo" />
     <meta property="og:description" content="Explore a sample catalogue for oils, herbs, and personal care with search, filters, and a local cart." />
     <meta property="og:site_name" content="Alaraby Oils" />
-    <meta property="og:image" content="https://orven-dev.github.io/AL-Araby-Oils-E-commerce-Website/og-image.png" />
+    <meta property="og:image" content="%VITE_SITE_URL%og-image.png" />
     <meta property="og:image:width" content="1376" />
     <meta property="og:image:height" content="768" />
     <meta property="og:image:type" content="image/png" />
@@ -31,7 +30,7 @@
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="AL-Araby Oils — Storefront Demo" />
     <meta name="twitter:description" content="Explore a sample catalogue for oils, herbs, and personal care with search, filters, and a local cart." />
-    <meta name="twitter:image" content="https://orven-dev.github.io/AL-Araby-Oils-E-commerce-Website/og-image.png" />
+    <meta name="twitter:image" content="%VITE_SITE_URL%og-image.png" />
     <meta name="twitter:image:alt" content="Amber glass bottles of Argan and Rose oil on green marble with rosemary and lavender" />
     
     <!-- Favicon -->

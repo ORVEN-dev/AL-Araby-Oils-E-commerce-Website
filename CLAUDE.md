@@ -14,10 +14,10 @@ Scaffolded by Lovable — `lovable-tagger` runs in dev mode only.
 npm run dev       # localhost:8080
 npm run build     # production build, must pass before any commit
 npm run lint      # eslint
-npm run deploy    # gh-pages -d dist  → live site
+npm run build:github-pages  # build for the legacy Pages base path
 ```
 
-**Live:** https://orven-dev.github.io/AL-Araby-Oils-E-commerce-Website/
+**Live:** https://al-araby-oils.orven-agency01.workers.dev/ (Cloudflare builds and deploys on pushes to `main`).
 **Repo:** https://github.com/ORVEN-dev/AL-Araby-Oils-E-commerce-Website
 
 ## Layout

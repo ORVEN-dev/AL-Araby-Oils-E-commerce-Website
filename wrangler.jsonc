@@ -1,0 +1,9 @@
+{
+  "name": "al-araby-oils",
+  "compatibility_date": "2025-09-24",
+  "workers_dev": true,
+  "preview_urls": false,
+  "assets": {
+    "directory": "./dist"
+  }
+}

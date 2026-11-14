@@ -3,7 +3,9 @@ import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { componentTagger } from "lovable-tagger";
 
-const repoName = 'AL-Araby-Oils-E-commerce-Website';
+const githubPagesBase = '/AL-Araby-Oils-E-commerce-Website/';
+const githubPagesUrl = `https://orven-dev.github.io${githubPagesBase}`;
+const cloudflareUrl = 'https://al-araby-oils.orven-agency01.workers.dev/';
 
 // GitHub Pages serves no custom headers, so the Content-Security-Policy has to
 // ride in a <meta> tag. It is injected at build time rather than written into
@@ -57,8 +59,13 @@ const cspPlugin = {
   },
 };
 
-export default defineConfig(({ mode }) => ({
-  base: mode === 'production' ? `/${repoName}/` : '/',
+export default defineConfig(({ command, mode }) => ({
+  base: command === 'build' && mode === 'github-pages' ? githubPagesBase : '/',
+  define: {
+    'import.meta.env.VITE_SITE_URL': JSON.stringify(
+      mode === 'github-pages' ? githubPagesUrl : cloudflareUrl,
+    ),
+  },
   
   server: {
     // localhost, not "::" — binding every interface exposes the dev server to
@@ -101,6 +108,6 @@ export default defineConfig(({ mode }) => ({
   },
 
   esbuild: {
-    drop: mode === 'production' ? ['console', 'debugger'] : []
+    drop: command === 'build' && mode !== 'development' ? ['console', 'debugger'] : []
   }
 }));

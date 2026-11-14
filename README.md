@@ -15,7 +15,7 @@ _A modern e-commerce frontend focused on clean UI, smooth UX, and scalability._
 ## 🚀 Live Demo
 
 🔗 **View Live Website:**
-[https://orven-dev.github.io/AL-Araby-Oils-E-commerce-Website/](https://orven-dev.github.io/AL-Araby-Oils-E-commerce-Website/)
+[https://al-araby-oils.orven-agency01.workers.dev/](https://al-araby-oils.orven-agency01.workers.dev/)
 
 ---
 
@@ -145,8 +145,9 @@ Independent ORVEN storefront concept with a sample catalogue, browser-local cart
 and saved products, and a checkout preview. The demo does not take payments,
 create orders, or collect account details.
 
-The production deployment serves the Vite build from the existing `gh-pages`
-branch. Hash routes remain under the repository's GitHub Pages base URL.
+Cloudflare Workers Builds deploys the Vite build on pushes to `main`. The
+older GitHub Pages build uses `npm run build:github-pages` for its repository
+base path. Both deployments use the same hash routes.
 
 ---
 
