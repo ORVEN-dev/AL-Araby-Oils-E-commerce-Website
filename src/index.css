@@ -24,10 +24,19 @@ All colors MUST be HSL.
     --secondary-foreground: 0 0% 15%;
 
     --muted: 35 20% 90%;
-    --muted-foreground: 0 0% 45%;
+    /* 38%, not 45%. This token is the placeholder colour (shadcn Input uses
+       placeholder:text-muted-foreground) and 45% measured 4.03:1 in the nav
+       search field. 38% is 5.3:1 on that field and 5.7:1 on the page. */
+    --muted-foreground: 160 10% 34%;
 
-    --accent: 355 75% 58%;
-    --accent-foreground: 0 0% 100%;
+    /* --accent is shadcn's *hover surface*, not a brand colour: `hover:bg-accent`
+       is baked into ghost buttons, dropdown items, select options and command
+       rows. It was crimson (355 75% 58%), which made every ghost hover in the app
+       — including the navbar cart and account icons — flash red. Back to a tint
+       of the cream palette, one step darker than --secondary so it reads as a
+       hover and nothing more. The offer colour is --badge (gold); see below. */
+    --accent: 35 25% 88%;
+    --accent-foreground: 0 0% 15%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
@@ -44,8 +53,22 @@ All colors MUST be HSL.
     --warning: 45 93% 47%;
     --warning-foreground: 0 0% 15%;
 
-    --badge: 355 75% 58%;
-    --badge-foreground: 0 0% 100%;
+    /* Gold — the flagship hero's oil ribbon and bottle cap. Decorative accent for
+       depth and sheen only; --warning stays the semantic yellow for ratings. */
+    --gold: 43 74% 58%;
+
+    /* The offer colour, on every "N% OFF" chip sitewide.
+       It was crimson with white text: 4.00:1, a straight AA fail, and it put a
+       third hue on a fold the hero had already established as emerald + gold.
+       Gold with dark emerald ink measures 7.8:1 and is a colour the page owns. */
+    --badge: 43 74% 58%; /* == --gold */
+    --badge-foreground: 162 45% 12%;
+
+    /* Depth. Layered rather than single-blur: a tight contact shadow plus a wide
+       ambient one is what reads as a real object above a real surface. */
+    --shadow-rest: 0 1px 2px hsl(162 45% 12% / 0.06), 0 4px 12px hsl(162 45% 12% / 0.05);
+    --shadow-lift: 0 2px 4px hsl(162 45% 12% / 0.07), 0 12px 28px hsl(162 45% 12% / 0.12);
+    --shadow-float: 0 4px 8px hsl(162 45% 12% / 0.08), 0 24px 56px hsl(162 45% 12% / 0.18);
   }
 
   .dark {
@@ -67,8 +90,8 @@ All colors MUST be HSL.
     --muted: 0 0% 20%;
     --muted-foreground: 0 0% 65%;
 
-    --accent: 355 75% 58%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 0 0% 22%;
+    --accent-foreground: 0 0% 95%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
@@ -86,5 +109,60 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground;
+  }
+
+  /* Long scroll-driven sections read better with even line lengths. */
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+  }
+}
+
+@layer utilities {
+  /* 3D scene setup. The depth throughout the site is real CSS 3D — perspective
+     plus rotateX/rotateY/translateZ — not a WebGL context. Keeps the bundle lean
+     and works on any phone that can composite a transform. */
+  .scene {
+    perspective: 1200px;
+  }
+
+  .scene-near {
+    perspective: 800px;
+  }
+
+  .preserve-3d {
+    transform-style: preserve-3d;
+  }
+
+  .shadow-rest {
+    box-shadow: var(--shadow-rest);
+  }
+
+  .shadow-lift {
+    box-shadow: var(--shadow-lift);
+  }
+
+  .shadow-float {
+    box-shadow: var(--shadow-float);
+  }
+}
+
+/*
+ * Global reduced-motion backstop.
+ *
+ * GSAP animations are gated with gsap.matchMedia() at the source, so this covers
+ * the CSS transitions and keyframes GSAP never touches. `transform: none` is
+ * deliberately NOT forced here: GSAP writes transforms inline and killing them
+ * would strip layout that the reduced-motion branch legitimately sets.
+ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }

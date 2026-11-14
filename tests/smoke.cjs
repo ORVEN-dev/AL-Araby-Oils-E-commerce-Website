@@ -1,0 +1,136 @@
+const assert = require("node:assert/strict");
+const { chromium } = require("playwright");
+const base = process.env.TEST_ORIGIN || "http://127.0.0.1:8503/AL-Araby-Oils-E-commerce-Website/";
+const cartKey = "orven:al-araby-oils:cart:v1";
+
+async function run() {
+  const browser = await chromium.launch({ channel: "chrome" });
+  try {
+    for (const width of [320, 390, 768, 1440]) {
+      const context = await browser.newContext({ viewport: { width, height: 900 }, reducedMotion: "reduce", permissions: ["clipboard-read", "clipboard-write"] });
+      await context.addInitScript(() => Object.defineProperty(navigator, "share", { value: undefined }));
+      const page = await context.newPage();
+      page.setDefaultTimeout(10000);
+      const errors = [], broken = [];
+      page.on("pageerror", error => errors.push(error.message));
+      page.on("response", response => { if (response.status() >= 400) broken.push(response.url()); });
+      const title = async (name) => page.getByRole("heading", { level: 1, name }).waitFor();
+      const open = async (hash, name) => { await page.goto(base + "#" + hash); await title(name); };
+      const fit = async () => assert.equal(await page.evaluate(() => document.documentElement.scrollWidth), width);
+      await page.goto(base);
+      await page.getByRole("link", { name: "Explore Catalogue" }).first().waitFor();
+      await fit();
+      await page.keyboard.press("Tab");
+      assert.match(await page.locator(":focus").innerText(), /Skip to main/);
+      if (width < 1024) {
+        const menu = page.getByRole("button", { name: "Open navigation menu" });
+        await menu.press("Enter");
+        await page.keyboard.press("Escape");
+        assert.equal(await menu.getAttribute("aria-expanded"), "false");
+        await menu.click();
+      }
+      const search = page.getByRole("searchbox", { name: "Search for products" });
+      await search.fill("argan");
+      await search.press("Enter");
+      await page.getByText("1 product for “argan”").waitFor();
+      await page.getByRole("button", { name: "Oils", exact: true }).click();
+      assert.match(page.url(), /category=Oils/);
+      const filtered = page.url();
+      await page.reload();
+      await page.getByText("1 product for “argan”").waitFor();
+      await page.goBack();
+      await page.waitForURL(url => !url.hash.includes("category="));
+      await page.goForward();
+      assert.equal(page.url(), filtered);
+      await page.getByRole("button", { name: "Herbs", exact: true }).click();
+      await page.getByText("No products match these filters.").waitFor();
+      await page.getByRole("button", { name: "Clear filters" }).click();
+      await title("All Products");
+      await page.getByRole("combobox", { name: "Sort products by" }).click();
+      await page.getByRole("option", { name: "Price: Low to High" }).click();
+      assert.match(page.url(), /sort=price/);
+      const add = page.getByRole("button", { name: "Add Argan Oil to cart", exact: true });
+      await add.click();
+      const group = page.getByRole("group", { name: "Quantity selector" });
+      const groupFits = await group.evaluate(el => el.scrollWidth <= el.clientWidth + 1);
+      assert.ok(groupFits, `quantity selector overflows at ${width}`);
+      await group.getByRole("button", { name: "Increase quantity" }).click();
+      await group.getByRole("button", { name: "Add 2 items to cart" }).click();
+      await fit();
+      await open("/cart", "Shopping Cart");
+      await page.getByText("$57.98", { exact: true }).first().waitFor();
+      await page.getByRole("button", { name: "Increase quantity of Argan Oil" }).click();
+      await page.getByText("$86.97", { exact: true }).first().waitFor();
+      await page.reload();
+      await page.getByText("$86.97", { exact: true }).first().waitFor();
+      await page.getByRole("link", { name: "Preview Checkout" }).click();
+      await title("Demo Checkout");
+      await page.getByRole("button", { name: "Preview Order Summary" }).click();
+      assert.equal(await page.locator("form :invalid").count(), 1);
+      await page.getByRole("checkbox").check();
+      await page.getByRole("button", { name: "Preview Order Summary" }).click();
+      await page.getByText(/No order was placed/).waitFor();
+      assert.deepEqual(await page.evaluate(key => JSON.parse(localStorage.getItem(key)),cartKey), [{id:"1",quantity:3}]);
+      await open("/product/1", "Argan Oil");
+      await page.getByRole("button", { name: "Save Argan Oil" }).click();
+      await page.getByRole("button", { name: "Share Argan Oil" }).click();
+      await page.getByText("Product link copied.").waitFor();
+      assert.match(await page.evaluate(() => navigator.clipboard.readText()), /#\/product\/1$/);
+      await fit();
+      await open("/saved", "Saved Products");
+      await page.reload();
+      await page.getByRole("heading", { name: "Argan Oil" }).waitFor();
+      await open("/product/1", "Argan Oil");
+      await page.getByRole("button", { name: "Remove Argan Oil" }).click();
+      await open("/saved", "Saved Products");
+      await page.getByText(/No saved products/).waitFor();
+      await open("/faq", "Demo FAQ");
+      await page.getByRole("button", { name: "Can I buy or pay for products?" }).press("Enter");
+      await page.getByText(/It does not place an order/).waitFor();
+      await open("/about", "About This Demo");
+      await open("/blog", "Catalogue Notes");
+      await page.evaluate(async () => {
+        const images = [...document.images];
+        images.forEach(img => { img.loading = "eager"; });
+        await Promise.all(images.map(img => img.decode()));
+      });
+      await fit();
+      await open("/checkout", "Demo Checkout");
+      await open("/cart", "Shopping Cart");
+      await page.getByRole("button", { name: /remove argan oil/i }).click();
+      await open("/checkout", "Your demo cart is empty");
+      assert.deepEqual(errors, []);
+      assert.deepEqual(broken, []);
+      await context.close();
+    }
+    const context = await browser.newContext();
+    await context.addInitScript(() => {
+      if (sessionStorage.getItem("seed")) return;
+      sessionStorage.setItem("seed", "1");
+      localStorage.setItem("cart", JSON.stringify([{ id: "1", quantity: 2, price: 0.01 }]));
+      Object.defineProperty(navigator, "share", { value: undefined });
+      Object.defineProperty(navigator, "clipboard", { value: { writeText: async () => { throw new Error("Denied"); } } });
+    });
+    const page = await context.newPage();
+    await page.goto(base + "#/cart");
+    await page.getByText("$57.98", { exact: true }).first().waitFor();
+    const second = await context.newPage();
+    await second.goto(base + "#/cart");
+    await second.getByText("$57.98", { exact: true }).first().waitFor();
+    await page.getByRole("button", { name: "Increase quantity of Argan Oil" }).click();
+    await second.getByText("$86.97", { exact: true }).first().waitFor();
+    await page.goto(base + "#/product/1");
+    await page.getByRole("button", { name: "Share Argan Oil" }).click();
+    await page.getByText(/Copy this link manually/).waitFor();
+    assert.match(await page.getByLabel("Product link").inputValue(), /#\/product\/1$/);
+    await page.evaluate(key => localStorage.setItem(key, "broken json"), cartKey);
+    await page.goto(base + "#/cart");
+    await page.reload();
+    await page.getByText("Your cart is empty").waitFor();
+    await context.close();
+    console.log("AL-Araby: four viewports, filters and history, cart, checkout, wishlist, sharing, migration, sync and malformed storage passed.");
+  } finally {
+    await browser.close();
+  }
+}
+run().catch(error => { console.error(error); process.exitCode = 1; });

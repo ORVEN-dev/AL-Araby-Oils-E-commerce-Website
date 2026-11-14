@@ -15,9 +15,9 @@ const Cart = () => {
         <p className="text-muted-foreground mb-6">
           Add some products to get started with your order
         </p>
-        <Link to="/shop">
-          <Button size="lg">Browse Products</Button>
-        </Link>
+        <Button asChild size="lg">
+          <Link to="/shop">Browse Products</Link>
+        </Button>
       </div>
     );
   }
@@ -55,8 +55,9 @@ const Cart = () => {
                         variant="ghost"
                         size="icon"
                         onClick={() => removeFromCart(item.id)}
+                        aria-label={`Remove ${item.name} from cart`}
                       >
-                        <Trash2 className="h-4 w-4 text-destructive" />
+                        <Trash2 className="h-4 w-4 text-destructive" aria-hidden="true" />
                       </Button>
                     </div>
 
@@ -66,16 +67,18 @@ const Cart = () => {
                           variant="outline"
                           size="icon"
                           onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                          aria-label={`Decrease quantity of ${item.name}`}
                         >
-                          <Minus className="h-4 w-4" />
+                          <Minus className="h-4 w-4" aria-hidden="true" />
                         </Button>
                         <span className="w-12 text-center font-medium">{item.quantity}</span>
                         <Button
                           variant="outline"
                           size="icon"
                           onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                          aria-label={`Increase quantity of ${item.name}`}
                         >
-                          <Plus className="h-4 w-4" />
+                          <Plus className="h-4 w-4" aria-hidden="true" />
                         </Button>
                       </div>
                       <p className="font-bold text-success">
@@ -102,7 +105,7 @@ const Cart = () => {
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Shipping</span>
-                  <span className="font-medium">Free</span>
+                  <span className="font-medium">Unavailable in demo</span>
                 </div>
                 <div className="border-t pt-3">
                   <div className="flex justify-between">
@@ -114,16 +117,12 @@ const Cart = () => {
                 </div>
               </div>
 
-              <Link to="/checkout">
-                <Button className="w-full bg-success hover:bg-success/90" size="lg">
-                  Proceed to Checkout
-                </Button>
-              </Link>
-              <Link to="/shop">
-                <Button variant="outline" className="w-full mt-3">
-                  Continue Shopping
-                </Button>
-              </Link>
+              <Button asChild className="w-full bg-success hover:bg-success/90" size="lg">
+                <Link to="/checkout">Preview Checkout</Link>
+              </Button>
+              <Button asChild variant="outline" className="w-full mt-3">
+                <Link to="/shop">Continue Shopping</Link>
+              </Button>
             </CardContent>
           </Card>
         </div>

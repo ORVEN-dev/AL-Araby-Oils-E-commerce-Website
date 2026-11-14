@@ -1,81 +1,17 @@
-import { Leaf, Heart, Award, Users } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
 
-const About = () => {
-  const values = [
-    {
-      icon: Leaf,
-      title: "100% Natural",
-      description: "All our products are made from pure, organic ingredients sourced sustainably.",
-    },
-    {
-      icon: Heart,
-      title: "Health First",
-      description: "Your wellness is our priority. We ensure every product meets the highest standards.",
-    },
-    {
-      icon: Award,
-      title: "Quality Assured",
-      description: "Rigorous testing and quality control for safe, effective products.",
-    },
-    {
-      icon: Users,
-      title: "Customer Care",
-      description: "Dedicated support team ready to help you on your wellness journey.",
-    },
-  ];
-
+export default function About() {
   return (
-    <div className="container mx-auto px-4 py-12">
-      <div className="max-w-3xl mx-auto text-center mb-12">
-        <h1 className="text-4xl font-bold mb-4">About Alaraby Oils</h1>
-        <p className="text-lg text-muted-foreground">
-          Your trusted partner in natural health and beauty since 2010
-        </p>
+    <section className="container mx-auto max-w-4xl px-4 py-14">
+      <p className="text-sm font-semibold text-primary">An independent ORVEN project</p>
+      <h1 className="mt-3 text-4xl font-bold">About This Demo</h1>
+      <p className="mt-4 max-w-prose text-muted-foreground">AL-Araby Oils explores how an online shop for oils, herbs and personal care can organize a catalogue and guide people from discovery to a cart preview.</p>
+      <div className="my-8 grid gap-4 sm:grid-cols-2">
+        <article className="rounded-xl border bg-card p-6"><h2 className="text-xl font-semibold">Sample catalogue</h2><p className="mt-2 text-muted-foreground">Products, prices, stock and discounts are examples. Images may illustrate product categories. There is no real ordering, shipping, payment or customer account.</p></article>
+        <article className="rounded-xl border bg-card p-6"><h2 className="text-xl font-semibold">What stays in your browser</h2><p className="mt-2 text-muted-foreground">The cart and saved product IDs are stored locally. Checkout collects no personal data. Product sharing uses your device’s share or copy controls. GitHub Pages serves the site.</p></article>
       </div>
-
-      <div className="max-w-4xl mx-auto mb-16">
-        <div className="prose prose-lg max-w-none">
-          <p className="text-muted-foreground text-center mb-8">
-            At Alaraby Oils, we believe in the power of nature to heal, nourish, and transform. Our
-            journey began with a simple mission: to make premium natural products accessible to
-            everyone seeking a healthier, more sustainable lifestyle.
-          </p>
-          <p className="text-muted-foreground text-center mb-8">
-            For over a decade, we've been sourcing the finest organic ingredients from around the
-            world, working directly with farmers and suppliers who share our commitment to quality
-            and sustainability. Every product in our collection is carefully crafted to deliver the
-            best that nature has to offer.
-          </p>
-        </div>
-      </div>
-
-      <div className="mb-16">
-        <h2 className="text-3xl font-bold text-center mb-8">Our Values</h2>
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {values.map((value, index) => (
-            <Card key={index}>
-              <CardContent className="p-6 text-center">
-                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-primary/10 flex items-center justify-center">
-                  <value.icon className="h-8 w-8 text-primary" />
-                </div>
-                <h3 className="font-semibold text-lg mb-2">{value.title}</h3>
-                <p className="text-sm text-muted-foreground">{value.description}</p>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </div>
-
-      <div className="bg-secondary/50 rounded-lg p-8 text-center max-w-4xl mx-auto">
-        <h2 className="text-2xl font-bold mb-4">Join Our Wellness Community</h2>
-        <p className="text-muted-foreground mb-6">
-          Discover natural solutions for your health and beauty needs. From premium essential oils
-          to organic herbs and skincare, we're here to support your journey to wellness.
-        </p>
-      </div>
-    </div>
+      <Button asChild><Link to="/shop">Explore the Catalogue</Link></Button>
+    </section>
   );
-};
-
-export default About;
+}

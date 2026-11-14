@@ -141,8 +141,12 @@ http://localhost:5173
 
 ## 🚧 Project Status
 
-✅ Frontend completed
-❌ Backend not implemented (UI only)
+Independent ORVEN storefront concept with a sample catalogue, browser-local cart
+and saved products, and a checkout preview. The demo does not take payments,
+create orders, or collect account details.
+
+The production deployment serves the Vite build from the existing `gh-pages`
+branch. Hash routes remain under the repository's GitHub Pages base URL.
 
 ---
 

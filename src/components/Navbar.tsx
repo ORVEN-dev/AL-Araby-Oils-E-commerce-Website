@@ -1,5 +1,5 @@
-import { Link } from "react-router-dom";
-import { ShoppingCart, User, Search, Menu, X } from "lucide-react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { ShoppingCart, Heart, Search, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useCart } from "@/contexts/CartContext";
@@ -15,14 +15,25 @@ const NAV_LINKS = [
   { to: "/shop?category=Skin Care", label: "Skin Care" },
   { to: "/shop?category=Hair Care", label: "Hair Care" },
   { to: "/shop?category=Supplements", label: "Supplements" },
-  { to: "/blog", label: "Blog" },
+  { to: "/blog", label: "Notes" },
 ];
 
 const linkClass =
   "text-sm font-medium hover:text-primary transition-colors rounded px-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary";
 
-const SearchField = ({ id }: { id: string }) => (
-  <>
+const SearchField = ({ id, onSearch }: { id: string; onSearch?: () => void }) => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const params = new URLSearchParams(location.search);
+  return (
+  <form key={location.key} role="search" className="relative flex gap-2" onSubmit={(event) => {
+    event.preventDefault();
+    const query = String(new FormData(event.currentTarget).get("q") ?? "").trim();
+    if (query) params.set("q", query);
+    else params.delete("q");
+    navigate({ pathname: "/shop", search: params.toString() });
+    onSearch?.();
+  }}>
     <label htmlFor={id} className="sr-only">
       Search for products
     </label>
@@ -32,12 +43,17 @@ const SearchField = ({ id }: { id: string }) => (
     />
     <Input
       id={id}
+      name="q"
       type="search"
+      defaultValue={params.get("q") ?? ""}
+      maxLength={120}
       placeholder="Search for herbs, oils, beauty products..."
       className="pl-10 bg-secondary"
     />
-  </>
-);
+    <Button type="submit" variant="outline">Search</Button>
+  </form>
+  );
+};
 
 const Navbar = () => {
   const { cartCount } = useCart();
@@ -83,38 +99,40 @@ const Navbar = () => {
           </Link>
 
           {/* Search Bar — hidden on mobile, lives in the drawer instead */}
-          <div className="hidden md:block flex-1 max-w-xl relative">
+          <div className="hidden lg:block flex-1 max-w-xl relative">
             <SearchField id="search-input" />
           </div>
 
           {/* Actions */}
-          <div className="flex items-center gap-4">
-            <Link to="/login">
-              <Button variant="ghost" size="icon" aria-label="Go to login page">
-                <User className="h-5 w-5" aria-hidden="true" />
-              </Button>
-            </Link>
-            <Link to="/cart" className="relative">
-              <Button
-                variant="ghost"
-                size="icon"
-                aria-label={`Shopping cart with ${cartCount} ${cartCount === 1 ? "item" : "items"}`}
-              >
+          <div className="flex items-center gap-1 sm:gap-4">
+            <Button asChild variant="ghost" size="icon" aria-label="Saved products">
+              <Link to="/saved">
+                <Heart className="h-5 w-5" aria-hidden="true" />
+              </Link>
+            </Button>
+            <Button
+              asChild
+              variant="ghost"
+              size="icon"
+              className="relative"
+              aria-label={`Shopping cart with ${cartCount} ${cartCount === 1 ? "item" : "items"}`}
+            >
+              <Link to="/cart">
                 <ShoppingCart className="h-5 w-5" aria-hidden="true" />
                 {cartCount > 0 && (
                   <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 bg-badge text-badge-foreground">
                     {cartCount}
                   </Badge>
                 )}
-              </Button>
-            </Link>
+              </Link>
+            </Button>
 
             {/* Mobile Menu Button */}
             <Button
               ref={menuButtonRef}
               variant="ghost"
               size="icon"
-              className="md:hidden"
+              className="lg:hidden"
               onClick={() => setIsOpen(!isOpen)}
               aria-expanded={isOpen}
               aria-controls="mobile-menu"
@@ -130,7 +148,10 @@ const Navbar = () => {
         </div>
 
         {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center gap-8 mt-4" aria-label="Main navigation">
+        {/* lg, not md: nine links at gap-8 measure 780px, so at exactly 768 the
+            last one pushed the page 12px into horizontal scroll. lg also matches
+            MEDIA.desktop in lib/gsap.ts, so nav and motion switch at one width. */}
+        <nav className="hidden lg:flex items-center gap-8 mt-4" aria-label="Main navigation">
           {NAV_LINKS.map(({ to, label }) => (
             <Link key={label} to={to} className={`${linkClass} py-1`}>
               {label}
@@ -142,20 +163,23 @@ const Navbar = () => {
             order — max-h-0 + opacity-0 alone keep them focusable. */}
         <nav
           id="mobile-menu"
-          className={`md:hidden overflow-hidden transition-all duration-300 ease-in-out ${
-            isOpen ? "max-h-[32rem] opacity-100 mt-4" : "max-h-0 opacity-0 invisible"
+          className={`lg:hidden overflow-y-auto transition-all duration-300 ease-in-out ${
+            isOpen ? "max-h-[min(34rem,75dvh)] opacity-100 mt-4" : "max-h-0 opacity-0 invisible"
           }`}
           aria-label="Mobile navigation"
         >
           <div className="flex flex-col gap-2 pb-4">
             <div className="relative mb-2">
-              <SearchField id="mobile-search-input" />
+              <SearchField id="mobile-search-input" onSearch={() => setIsOpen(false)} />
             </div>
+            {/* min-h-11 (44px), not py-2: these were 343×36 rows, under the
+                WCAG 2.5.5 touch floor on the one layout that is only ever
+                touched. */}
             {NAV_LINKS.map(({ to, label }) => (
               <Link
                 key={label}
                 to={to}
-                className={`${linkClass} py-2`}
+                className={`${linkClass} flex min-h-[44px] items-center`}
                 onClick={() => setIsOpen(false)}
               >
                 {label}

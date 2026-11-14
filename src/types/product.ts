@@ -4,9 +4,8 @@ export interface Product {
   description: string;
   price: number;
   originalPrice?: number;
-  rating: number;
-  reviewCount: number;
   image: string;
+  illustrativeImage?: boolean;
   category: string;
   discount?: number;
   inStock: boolean;
